@@ -76,13 +76,6 @@ class Estimator():
         self.optimizer = tf.train.RMSPropOptimizer(0.00025, 0.99, 0.0, 1e-6)
         self.train_op = self.optimizer.minimize(self.loss, global_step=tf.contrib.framework.get_global_step())
 
-        # Summaries for Tensorboard
-        self.summaries = tf.summary.merge([
-            tf.summary.scalar("loss", self.loss),
-            tf.summary.histogram("loss_hist", self.losses),
-            tf.summary.histogram("q_values_hist", self.predictions),
-            tf.summary.scalar("max_q_value", tf.reduce_max(self.predictions))
-        ])
 
     def predict(self, sess, s):
         """
@@ -192,7 +185,7 @@ def deep_q_learning(sess,
                     state_processor,
                     replay_memory_size=500000,
                     replay_memory_init_size=50000,
-                    update_target_estimator_every=10000,
+                    update_target_estimator_every=60,
                     epsilon_start=1.0,
                     epsilon_end=0.1,
                     epsilon_decay_steps=500000,
@@ -213,11 +206,17 @@ def deep_q_learning(sess,
     policy = make_epsilon_greedy_policy(q_estimator, len(VALID_ACTIONS))
 
     # populate the replay memory with initial experience
+
     # state: 1*3*1   , note that input has more moments of this
     state = tf.placeholder(shape=[None, 1, 3, 3], dtype=tf.int8)
     stateNP = np.random.randint(0, 1, size=(1, 3))
     state = state_processor.process(sess, stateNP)
     state = np.stack([state] * 3, axis=2)
+    for i in range(replay_memory_init_size):
+        action_probs = policy(sess, state, epsilons[min(total_t,epsilon_decay_steps-1)])
+        action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
+        #TODO here
+        next_state =
 
     print("state")
     print(state)
@@ -242,6 +241,9 @@ def deep_q_learning(sess,
     #print("next_state :, :, 1:") from column 1 to infinity
     #print(next_state[:, :, 1:])
     #add to memory
+
+
+
     #initialise runtime state
     stateNP = np.random.randint(0, 1, size=(1, 3))
     state = state_processor.process(sess, stateNP)
@@ -252,10 +254,13 @@ def deep_q_learning(sess,
         epsilon = epsilons[min(total_t,epsilon_decay_steps-1)]
 
         #update Q target parameters every few steps
+        if total_t%update_target_estimator_every ==0:
+            copy_model_parameters(sess, q_estimator, target_estimator)
 
-
-    # epsilon_end is epsilon
-
+        #take a step
+        action_probs = policy(sess, state, epsilon)
+        action = np.random.choice(np.arange(len(action_probs)), p = action_probs)
+        #TODO
 
 
 
@@ -277,29 +282,23 @@ target_estimator = Estimator(scope="target_q")
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    count = 0
-    while 1 > 0:
-        count = count + 1
-        time.sleep(1)
-        # 1.
-        # collect data and train
-        #
-        deep_q_learning(sess,
+
+
+    deep_q_learning(sess,
                         q_estimator=q_estimator,
                         target_estimator=target_estimator,
                         state_processor=state_processor,
                         replay_memory_size=500000,
                         replay_memory_init_size=50000,
-                        update_target_estimator_every=10000,
+                        update_target_estimator_every=60,
                         epsilon_start=1.0,
                         epsilon_end=0.1,
                         epsilon_decay_steps=500000,
                         discount_factor=0.99,
                         batch_size=32
                         )
-        print("good")
-        if count > 5:
-            break
+    print("good")
+
 
 
 

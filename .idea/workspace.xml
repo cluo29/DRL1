@@ -38,9 +38,11 @@
       <file leaf-file-name="test.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="46">
-              <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="18" />
-              <folding />
+            <state relative-caret-position="-325">
+              <caret line="213" column="44" lean-forward="true" selection-start-line="213" selection-start-column="44" selection-end-line="213" selection-end-column="44" />
+              <folding>
+                <element signature="e#0#23#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -60,8 +62,8 @@
       <file leaf-file-name="draft.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/draft.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="250" column="23" lean-forward="true" selection-start-line="250" selection-start-column="23" selection-end-line="250" selection-end-column="23" />
+            <state relative-caret-position="181">
+              <caret line="217" column="18" lean-forward="false" selection-start-line="217" selection-start-column="18" selection-end-line="217" selection-end-column="18" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -72,8 +74,8 @@
       <file leaf-file-name="playfulCode.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/playfulCode.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="115">
-              <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+            <state relative-caret-position="92">
+              <caret line="4" column="20" lean-forward="true" selection-start-line="4" selection-start-column="20" selection-end-line="4" selection-end-column="20" />
               <folding />
             </state>
           </provider>
@@ -367,7 +369,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4140">
           <caret line="185" column="0" lean-forward="false" selection-start-line="185" selection-start-column="0" selection-end-line="185" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -455,7 +459,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4140">
           <caret line="185" column="0" lean-forward="false" selection-start-line="185" selection-start-column="0" selection-end-line="185" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -541,26 +547,28 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
+    <entry file="file://$PROJECT_DIR$/playfulCode.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="46">
-          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="18" />
+        <state relative-caret-position="92">
+          <caret line="4" column="20" lean-forward="true" selection-start-line="4" selection-start-column="20" selection-end-line="4" selection-end-column="20" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/playfulCode.py">
+    <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="115">
-          <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="-325">
+          <caret line="213" column="44" lean-forward="true" selection-start-line="213" selection-start-column="44" selection-end-line="213" selection-end-column="44" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/draft.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="250" column="23" lean-forward="true" selection-start-line="250" selection-start-column="23" selection-end-line="250" selection-end-column="23" />
+        <state relative-caret-position="181">
+          <caret line="217" column="18" lean-forward="false" selection-start-line="217" selection-start-column="18" selection-end-line="217" selection-end-column="18" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
