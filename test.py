@@ -176,27 +176,46 @@ class StateProcessor():
         """
         return sess.run(self.output, { self.input_state: state })
 
+def deep_q_learning(sess,
+                    q_estimator=q_estimator,
+                    target_estimator = target_estimator,
+                    state_processor = state_processor,
+                    replay_memory_size=500000,
+                    replay_memory_init_size=50000,
+                    update_target_estimator_every=10000,
+                    epsilon_start=1.0,
+                    epsilon_end=0.1,
+                    epsilon_decay_steps=500000,
+                    discount_factor=0.99,
+                    batch_size=1
+                    ):
+    
 
 
-# State processor
-#state_processor = StateProcessor()
-
-#q_estimator = Estimator(scope="q")
 
 tf.reset_default_graph()
 
 global_step = tf.Variable(0, name='global_step', trainable = False)
+
+# State processor
+state_processor = StateProcessor()
+
+q_estimator = Estimator(scope="q")
+target_estimator = Estimator(scope="target_q")
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     count = 0
     while 1>0:
         count = count + 1
-        time.sleep(5)
+        time.sleep(1)
+        # 1.
+        # collect data and train
+        #
+        #
         print("good")
         if count > 5:
             break
 
-        #123
-        #collect data and train
+
 
