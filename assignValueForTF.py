@@ -2,6 +2,8 @@
 import tensorflow as tf
 import numpy as np
 
+
+
 x = tf.placeholder(tf.float32, shape=[None, 2])
 y_ = tf.placeholder(tf.float32, shape=[None, 2])
 loss = tf.reduce_sum(tf.abs(tf.subtract(x, y_)))#Function chosen arbitrarily

@@ -9,6 +9,7 @@ from collections import deque, namedtuple
 
 VALID_ACTIONS = [0, 1, 2]
 
+
 class Estimator():
     """Q-Value Estimator neural network.
 
@@ -36,17 +37,17 @@ class Estimator():
         # Placeholders for our input
         # Our input are 4 RGB frames of shape 160, 160 each
         # Chu input, 3 moments, temperature, power, fan
-        #not change power at first, power =2
+        # not change power at first, power =2
         self.X_pl = tf.placeholder(shape=[None, 1, 3, 3], dtype=tf.int8, name="X")
         # The TD target value
-        #Q value
+        # Q value
         ##probably we need to get this at runtime, on the fly!
-        #Ground truth
+        # Ground truth
         self.y_pl = tf.placeholder(shape=[None], dtype=tf.float32, name="y")
         # Integer id of which action was selected
         self.actions_pl = tf.placeholder(shape=[None], dtype=tf.int32, name="actions")
 
-        #X = tf.to_float(self.X_pl) / 255.0
+        # X = tf.to_float(self.X_pl) / 255.0
         X = tf.to_float(self.X_pl) / 1.0
         batch_size = tf.shape(self.X_pl)[0]
 
@@ -95,7 +96,6 @@ class Estimator():
         """
         return sess.run(self.predictions, {self.X_pl: s})
 
-
     def update(self, sess, s, a, y):
         """
         Updates the estimator towards the given targets.
@@ -107,13 +107,14 @@ class Estimator():
         Returns:
           The calculated loss on the batch.
         """
-        feed_dict = { self.X_pl: s, self.y_pl: y, self.actions_pl: a }
+        feed_dict = {self.X_pl: s, self.y_pl: y, self.actions_pl: a}
         summaries, global_step, _, loss = sess.run(
             [self.summaries, tf.contrib.framework.get_global_step(), self.train_op, self.loss],
             feed_dict)
         if self.summary_writer:
             self.summary_writer.add_summary(summaries, global_step)
         return loss
+
 
 def copy_model_parameters(sess, estimator1, estimator2):
     """
@@ -146,20 +147,22 @@ def make_epsilon_greedy_policy(estimator, nA):
         A function that takes the (sess, observation, epsilon) as an argument and returns
         the probabilities for each action in the form of a numpy array of length nA.
     """
+
     def policy_fn(sess, observation, epsilon):
         A = np.ones(nA, dtype=float) * epsilon / nA
         q_values = estimator.predict(sess, np.expand_dims(observation, 0))[0]
         best_action = np.argmax(q_values)
         A[best_action] += (1.0 - epsilon)
         return A
-    return policy_fn
 
+    return policy_fn
 
 
 class StateProcessor():
     """
     Processes a raw Atari iamges. Resizes it and converts it to grayscale.
     """
+
     def __init__(self):
         # Build the Tensorflow graph
         with tf.variable_scope("state_processor"):
@@ -175,14 +178,13 @@ class StateProcessor():
         Returns:
             A processed [84, 84, 1] state representing grayscale values.
         """
-        return sess.run(self.output, { self.input_state: state })
-
+        return sess.run(self.output, {self.input_state: state})
 
 
 def deep_q_learning(sess,
-                    q_estimator=q_estimator,
-                    target_estimator = target_estimator,
-                    state_processor = state_processor,
+                    q_estimator,
+                    target_estimator,
+                    state_processor,
                     replay_memory_size=500000,
                     replay_memory_init_size=50000,
                     update_target_estimator_every=10000,
@@ -192,35 +194,33 @@ def deep_q_learning(sess,
                     discount_factor=0.99,
                     batch_size=1
                     ):
-    Transition = namedtuple("Transition", ["state","action","reward","next_state","done"])
+    Transition = namedtuple("Transition", ["state", "action", "reward", "next_state", "done"])
 
-    #replay memory
+    # replay memory
     replay_memory = []
 
     total_t = sess.run(tf.contrib.framework.get_global_step())
 
-    #the epsilon decay schedule
+    # the epsilon decay schedule
     epsilons = np.linspace(epsilon_start, epsilon_end, epsilon_decay_steps)
 
-    #the policy we're following
+    # the policy we're following
     policy = make_epsilon_greedy_policy(q_estimator, len(VALID_ACTIONS))
 
-    #populate the replay memory with initial experience
-    #state: 1*3*1   , note that input has more moments of this
+    # populate the replay memory with initial experience
+    # state: 1*3*1   , note that input has more moments of this
     state = tf.placeholder(shape=[None, 1, 3, 3], dtype=tf.int8)
     stateNP = np.random.randint(0, 3, size=(1, 3))
     state = state_processor.process(sess, stateNP)
-    state = np.stack([state]*3, axis =2)
+    state = np.stack([state] * 3, axis=2)
     for i in range(replay_memory_init_size):
-        action_probs = policy(sess, state, epsilons[min(total_t, epsilon_decay_steps-1)])
+        action_probs = policy(sess, state, epsilons[min(total_t, epsilon_decay_steps - 1)])
         action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
-
-
-
+        print(action)
 
 tf.reset_default_graph()
 
-global_step = tf.Variable(0, name='global_step', trainable = False)
+global_step = tf.Variable(0, name='global_step', trainable=False)
 
 # State processor
 state_processor = StateProcessor()
@@ -231,13 +231,25 @@ target_estimator = Estimator(scope="target_q")
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     count = 0
-    while 1>0:
+    while 1 > 0:
         count = count + 1
         time.sleep(1)
         # 1.
         # collect data and train
         #
-        #
+        deep_q_learning(sess,
+                        q_estimator=q_estimator,
+                        target_estimator=target_estimator,
+                        state_processor=state_processor,
+                        replay_memory_size=500000,
+                        replay_memory_init_size=50000,
+                        update_target_estimator_every=10000,
+                        epsilon_start=1.0,
+                        epsilon_end=0.1,
+                        epsilon_decay_steps=500000,
+                        discount_factor=0.99,
+                        batch_size=1
+                        )
         print("good")
         if count > 5:
             break
