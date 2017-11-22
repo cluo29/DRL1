@@ -180,6 +180,11 @@ class StateProcessor():
         """
         return sess.run(self.output, {self.input_state: state})
 
+def getTestState(i_episode):
+    if i_episode ==0:
+        return np.random.randint(0, 1, size=(1, 3))
+    else:
+
 
 def deep_q_learning(sess,
                     q_estimator,
@@ -192,7 +197,7 @@ def deep_q_learning(sess,
                     epsilon_end=0.1,
                     epsilon_decay_steps=500000,
                     discount_factor=0.99,
-                    batch_size=1
+                    batch_size=32
                     ):
     Transition = namedtuple("Transition", ["state", "action", "reward", "next_state", "done"])
 
@@ -210,13 +215,55 @@ def deep_q_learning(sess,
     # populate the replay memory with initial experience
     # state: 1*3*1   , note that input has more moments of this
     state = tf.placeholder(shape=[None, 1, 3, 3], dtype=tf.int8)
-    stateNP = np.random.randint(0, 3, size=(1, 3))
+    stateNP = np.random.randint(0, 1, size=(1, 3))
     state = state_processor.process(sess, stateNP)
     state = np.stack([state] * 3, axis=2)
-    for i in range(replay_memory_init_size):
-        action_probs = policy(sess, state, epsilons[min(total_t, epsilon_decay_steps - 1)])
-        action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
-        print(action)
+
+    print("state")
+    print(state)
+    #like
+    #[[[0 0 0]
+    #  [0 0 0]
+    # [0 0 0]]]
+    state2 = tf.placeholder(shape=[None, 1, 3, 3], dtype=tf.int8)
+    stateNP2 = np.random.randint(0, 1, size=(1, 3))
+    state2 = state_processor.process(sess, stateNP2)
+    print("state2")
+    print(state2)
+    #like [[0 2 2]]
+    next_state = state2
+    next_state = np.append(state[:, :, 1:], np.expand_dims(next_state, 2), axis=2)
+    print("next_state")
+    print(next_state)
+    # like
+    # [[[0 0 0]
+    #  [0 0 2]
+    # [0 0 2]]]
+    #print("next_state :, :, 1:") from column 1 to infinity
+    #print(next_state[:, :, 1:])
+    #add to memory
+    #initialise runtime state
+    stateNP = np.random.randint(0, 1, size=(1, 3))
+    state = state_processor.process(sess, stateNP)
+    state = np.stack([state] * 3, axis=2)
+    loss = None
+    # explore 6 steps
+    for t in range (6):
+        epsilon = epsilons[min(total_t,epsilon_decay_steps-1)]
+
+        #update Q target parameters every few steps
+
+
+    # epsilon_end is epsilon
+
+
+
+
+
+    # run 19 for test, if in practice, forever
+
+
+
 
 tf.reset_default_graph()
 
@@ -248,7 +295,7 @@ with tf.Session() as sess:
                         epsilon_end=0.1,
                         epsilon_decay_steps=500000,
                         discount_factor=0.99,
-                        batch_size=1
+                        batch_size=32
                         )
         print("good")
         if count > 5:
