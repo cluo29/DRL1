@@ -164,16 +164,21 @@ def executeAction(action,  L, F, T):
     elif F_Next ==1:
         T_Next = T_Next - 2
 
+    reward = 0
+
     if T_Next>150:
+        reward = 150 - T_Next
         T_Next = 150
     elif T_Next<-40:
         T_Next = -40
 
-    reward =0
+
     if T_Next<= 70:
-        reward = L_Next + 2 - F_Next
+        reward = reward+ L_Next + 80 - F_Next
     else:
-        reward = 70 - T_Next + L_Next + 2 - F_Next
+        reward = reward + 70
+
+    reward = reward / 81.0
 
     return L_Next, F_Next, T_Next, reward
 
@@ -284,7 +289,7 @@ def deep_q_learning(sess,
     state = state_processor.process(sess, stateNP)
     state = np.stack([state] * 3, axis=2)
     # run replay_memory_init_size for test, if in practice, forever,999999
-    for i in range(999999):
+    for i in range(999):
 
         #update target Function
         if total_t % update_target_estimator_every ==0:
@@ -355,7 +360,7 @@ with tf.Session() as sess:
                     state_processor=state_processor,
                     replay_memory_size=500000,
                     replay_memory_init_size=60,
-                    update_target_estimator_every=60,
+                    update_target_estimator_every=600,
                     epsilon_start=1.0,
                     epsilon_end=0.1,
                     epsilon_decay_steps=500000,
