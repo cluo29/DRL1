@@ -129,6 +129,13 @@ def copy_model_parameters(sess, estimator1, estimator2):
 
     sess.run(update_ops)
 
+def stateTransit(state,action):
+    stateVectorNow=state[:, :, 2]
+    print("stateVectorNow")
+
+    print(stateVectorNow)
+    print("action")
+    print(action)
 
 def make_epsilon_greedy_policy(estimator, nA):
     """
@@ -173,10 +180,6 @@ class StateProcessor():
         """
         return sess.run(self.output, {self.input_state: state})
 
-def getTestState(i_episode):
-    if i_episode ==0:
-        return np.random.randint(0, 1, size=(1, 3))
-    else:
 
 
 def deep_q_learning(sess,
@@ -216,7 +219,8 @@ def deep_q_learning(sess,
         action_probs = policy(sess, state, epsilons[min(total_t,epsilon_decay_steps-1)])
         action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
         #TODO here
-        next_state =
+        stateTransit(state, action)
+        #next_state =
 
     print("state")
     print(state)
