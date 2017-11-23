@@ -289,7 +289,7 @@ def deep_q_learning(sess,
     state = state_processor.process(sess, stateNP)
     state = np.stack([state] * 3, axis=2)
     # run replay_memory_init_size for test, if in practice, forever,999999
-    for i in range(999):
+    for i in range(9999):
 
         #update target Function
         if total_t % update_target_estimator_every ==0:
