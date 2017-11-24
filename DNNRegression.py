@@ -38,7 +38,7 @@ class Estimator():
         # Our input are 4 RGB frames of shape 160, 160 each
         # Chu input, 3 moments, temperature, power, fan
         # not change power at first, power =2
-        self.X_pl = tf.placeholder(shape=[None, 1, 3, 3], dtype=tf.int32, name="X")
+        self.X_pl = tf.placeholder(shape=[None,1,1], dtype=tf.int32, name="X")
         # The TD target value
         # Q value
         ##probably we need to get this at runtime, on the fly!
@@ -138,83 +138,9 @@ def copy_model_parameters(sess, estimator1, estimator2):
 
 
 
-def executeAction(action,  L, F, T):
-    L_Next = 0
-    F_Next = 0
-    T_Next = T
-    if action in [0,3,6]:
-        L_Next = L
-    elif action in [1,4,7]:
-        L_Next = L + 1
-    elif action in [2,5,8]:
-        L_Next = L - 1
-    if L_Next == 3:
-        L_Next = 2
-    elif L_Next == 0:
-        L_Next = 1
-
-    if action in [0, 1, 2]:
-        F_Next = F
-    elif action in [3,4,5]:
-        F_Next = F + 1
-    elif action in [6,7,8]:
-        F_Next = F -1
-    if F_Next == 3:
-        F_Next = 2
-    elif F_Next == -1:
-        F_Next = 0
-
-    if L_Next == 2:
-        T_Next = T_Next + 5
-    else:
-        T_Next = T_Next + 3
-    if F_Next ==2:
-        T_Next = T_Next - 4
-    elif F_Next ==1:
-        T_Next = T_Next - 2
-
-    reward = 0
-
-
-    if T_Next<= 70:
-        reward     = reward + L_Next + 153 - F_Next
-    else:
-        reward = - T_Next
-
-    if T_Next>150:
-        T_Next = 150
-    elif T_Next<-40:
-        T_Next = -40
-
-
-
-    reward = reward / 155.0
-
-    return L_Next, F_Next, T_Next, reward
-
-
 def stateTransit(state, action):
-    stateVectorNow = state[:, :, 2]
-    #print("state")
-    #print(state)
-    #print("stateVectorNow")
-    #print(stateVectorNow)
-    #print("stateVectorNow 1st power L")
-    #print(stateVectorNow[0][0])
-    L = stateVectorNow[0][0]
-    #print("stateVectorNow 2nd fan F")
-    #print(stateVectorNow[0][1])
-    F = stateVectorNow[0][1]
-    #print("stateVectorNow 3rd temperature T")
-    #print(stateVectorNow[0][2])
-    T = stateVectorNow[0][2]
-    #print("action")
-    #print(action)
-    state_next = state[:, :, 2]
-    L_Next, F_Next, T_Next, reward = executeAction(action, L, F, T)
-    state_next[0][0] = L_Next
-    state_next[0][1] = F_Next
-    state_next[0][2] = T_Next
+    reward = action
+    state_next = state
     return state_next, reward
 
 
@@ -244,7 +170,7 @@ class StateProcessor():
     def __init__(self):
         # Build the Tensorflow graph
         with tf.variable_scope("state_processor"):
-            self.input_state = tf.placeholder(shape=[1, 3], dtype=tf.int32)
+            self.input_state = tf.placeholder(shape=[1,1], dtype=tf.int32)
 
             self.output = self.input_state
 
@@ -287,31 +213,10 @@ def deep_q_learning(sess,
     # populate the replay memory with initial experience
 
     # state: 1*3*1   , note that input has more moments of this
-    state = tf.placeholder(shape=[None, 1, 3, 3], dtype=tf.int32)
-    stateNP = np.random.randint(0, 1, size=(1, 3))
-    # test code
-    stateNP = np.random.randint(0, 3, size=(1, 3))
+    state = tf.placeholder(shape=[None], dtype=tf.int32)
+    stateNP = np.random.randint(0, 1, size=(1, 1))
     # test code
     state = state_processor.process(sess, stateNP)
-    state = np.stack([state] * 3, axis=2)
-
-    state[0][0][0] = 1
-
-    state[0][0][1] = 1
-
-    state[0][0][2] = 1
-
-    state[0][1][0] = 0
-
-    state[0][1][1] = 0
-
-    state[0][1][2] = 0
-
-    state[0][2][0] = 0
-
-    state[0][2][1] = 3
-
-    state[0][2][2] = 6
 
     # run replay_memory_init_size for test, if in practice, forever,999999
     for i in range(999999999):
@@ -326,14 +231,14 @@ def deep_q_learning(sess,
         action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
         next_state, reward = stateTransit(state, action)
         print("now state")
-        print(state[:,:,2])
+        print(state)
         print("action")
         print(action)
         print("reward")
         print(reward)
 
         #make vector into matrix
-        next_state = np.append(state[:,:,1:],np.expand_dims(next_state,2), axis=2)
+        next_state = state
 
         #if out of memory, kill one
         if len(replay_memory) == replay_memory_size:
