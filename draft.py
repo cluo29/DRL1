@@ -53,20 +53,22 @@ class Estimator():
 
         # Three convolutional layers
         conv1 = tf.contrib.layers.conv2d(
-            X, 4, 1, 1, activation_fn=tf.nn.relu)
+            X, 14, 1, 1, activation_fn=tf.nn.relu)
 
         conv3 = tf.contrib.layers.conv2d(
-            conv1, 4, 1, 1, activation_fn=tf.nn.relu)
+            conv1, 14, 1, 1, activation_fn=tf.nn.relu)
 
         # Fully connected layers
         flattened = tf.contrib.layers.flatten(conv3)
-        fc1 = tf.contrib.layers.fully_connected(flattened, 4)
+        fc1 = tf.contrib.layers.fully_connected(flattened, 14)
         self.predictions = tf.contrib.layers.fully_connected(fc1, len(VALID_ACTIONS))
 
         # Get the predictions for the chosen actions only,
 
         gather_indices = tf.range(batch_size) * tf.shape(self.predictions)[1] + self.actions_pl
         self.action_predictions = tf.gather(tf.reshape(self.predictions, [-1]), gather_indices)
+
+
 
         # Calcualte the loss
         self.losses = tf.squared_difference(self.y_pl, self.action_predictions)
@@ -166,19 +168,20 @@ def executeAction(action,  L, F, T):
 
     reward = 0
 
+
+    if T_Next<= 70:
+        reward     = reward + L_Next + 153 - F_Next
+    else:
+        reward = - T_Next
+
     if T_Next>150:
-        reward = 150 - T_Next
         T_Next = 150
     elif T_Next<-40:
         T_Next = -40
 
 
-    if T_Next<= 70:
-        reward = reward+ L_Next + 80 - F_Next
-    else:
-        reward = reward + 70
 
-    reward = reward / 81.0
+    reward = reward / 155.0
 
     return L_Next, F_Next, T_Next, reward
 
@@ -288,24 +291,44 @@ def deep_q_learning(sess,
     # test code
     state = state_processor.process(sess, stateNP)
     state = np.stack([state] * 3, axis=2)
+
+    state[0][0][0] = 1
+
+    state[0][0][1] = 1
+
+    state[0][0][2] = 1
+
+    state[0][1][0] = 0
+
+    state[0][1][1] = 0
+
+    state[0][1][2] = 0
+
+    state[0][2][0] = 0
+
+    state[0][2][1] = 3
+
+    state[0][2][2] = 6
+
     # run replay_memory_init_size for test, if in practice, forever,999999
-    for i in range(9999):
+    for i in range(999999999):
 
         #update target Function
         if total_t % update_target_estimator_every ==0:
             copy_model_parameters(sess, q_estimator, target_estimator)
 
         action_probs = policy(sess, state, epsilons[min(total_t, epsilon_decay_steps - 1)])
-        print("action_probs")
-        print(action_probs)
+        #print("action_probs")
+        #print(action_probs)
         action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
         next_state, reward = stateTransit(state, action)
-        print("action")
-        print(action)
-        print("reward")
-        print(reward)
-        print("next_state")
-        print(next_state)
+        #print("now state")
+        #print(state[:,:,2])
+        #print("action")
+        #print(action)
+        #print("reward")
+        #print(reward)
+
         #make vector into matrix
         next_state = np.append(state[:,:,1:],np.expand_dims(next_state,2), axis=2)
 
@@ -313,11 +336,10 @@ def deep_q_learning(sess,
         if len(replay_memory) == replay_memory_size:
             replay_memory.pop(0)
 
-
         #Save transition to replay memory
         replay_memory.append(Transition(state, action, reward, next_state))
 
-        if i>batch_size:
+        if i>replay_memory_init_size:
 
             #get a batch
             samples = random.sample(replay_memory,batch_size)
@@ -326,19 +348,70 @@ def deep_q_learning(sess,
 
             # do q
             q_values_next = q_estimator.predict(sess, next_states_batch)
+            #print("states_batch")
+            #print(states_batch)
+            #print("prediction")
+            #print(q_values_next)
             best_actions = np.argmax(q_values_next, axis = 1)
+            #print("best_actions")
+            #print(best_actions)
+            q_values_next_target = target_estimator.predict(sess, next_states_batch)
+            targets_batch = reward_batch #+ discount_factor * q_values_next_target[np.arange(batch_size),best_actions]
+
+            #gradient
+            states_batch = np.array(states_batch)
+            loss = q_estimator.update(sess, states_batch, action_batch, targets_batch)
+            print("targets_batch")
+            print(targets_batch)
+            print("loss")
+            print(loss)
+            total_t += 1
+
+        state = next_state
+    #training over!
+    print("training over")
+    #use best action now
+    for i in range(9999):
+        print("-----real-------")
+        action_probs = policy(sess, state, epsilons[min(total_t, epsilon_decay_steps - 1)])
+        #print("action_probs")
+        #print(action_probs)
+        action = np.argmax(action_probs)
+        next_state, reward = stateTransit(state, action)
+        #print("now state")
+        #print(state[:, :, 2])
+        #print("action")
+        #print(action)
+        #print("reward")
+        #print(reward)
+        next_state = np.append(state[:, :, 1:], np.expand_dims(next_state, 2), axis=2)
+
+        # if out of memory, kill one
+        if len(replay_memory) == replay_memory_size:
+            replay_memory.pop(0)
+
+        # Save transition to replay memory
+        replay_memory.append(Transition(state, action, reward, next_state))
+
+        if i > batch_size:
+            # get a batch
+            samples = random.sample(replay_memory, batch_size)
+            states_batch, action_batch, reward_batch, next_states_batch = map(np.array, zip(*samples))
+
+            # do q
+            q_values_next = q_estimator.predict(sess, next_states_batch)
+            best_actions = np.argmax(q_values_next, axis=1)
             print("best_actions")
             print(best_actions)
             q_values_next_target = target_estimator.predict(sess, next_states_batch)
-            targets_batch = reward_batch + discount_factor * q_values_next_target[np.arange(batch_size),best_actions]
+            targets_batch = reward_batch #+ discount_factor * q_values_next_target[np.arange(batch_size), best_actions]
 
-            #gradient
+            # gradient
             states_batch = np.array(states_batch)
             loss = q_estimator.update(sess, states_batch, action_batch, targets_batch)
             total_t += 1
 
         state = next_state
-
     return 0
 
 tf.reset_default_graph()
@@ -359,7 +432,7 @@ with tf.Session() as sess:
                     target_estimator=target_estimator,
                     state_processor=state_processor,
                     replay_memory_size=500000,
-                    replay_memory_init_size=60,
+                    replay_memory_init_size=600,
                     update_target_estimator_every=600,
                     epsilon_start=1.0,
                     epsilon_end=0.1,
