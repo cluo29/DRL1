@@ -1,6 +1,8 @@
+state_next = [[1,2,3]]
+print(state_next)
 
+state_next[0][0] = 122
+state_next[0][1] = 222
+state_next[0][2] = 322
 
-
-fc1 = tf.contrib.layers.fully_connected(input, num_outputs=neurons, activation_fn=tf.nn.relu,
-                                        weights_initializer=tf.contrib.layers.xavier_initializer(),
-                                        biases_initializer=tf.constant_initializer(0.1))
+print(state_next)

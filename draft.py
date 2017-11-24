@@ -210,7 +210,7 @@ def stateTransit(state, action):
     T = stateVectorNow[0][2]
     #print("action")
     #print(action)
-    state_next = state[:, :, 2]
+    state_next = [[0,0,0]]
     L_Next, F_Next, T_Next, reward = executeAction(action, L, F, T)
     state_next[0][0] = L_Next
     state_next[0][1] = F_Next
@@ -321,19 +321,30 @@ def deep_q_learning(sess,
             copy_model_parameters(sess, q_estimator, target_estimator)
 
         action_probs = policy(sess, state, epsilons[min(total_t, epsilon_decay_steps - 1)])
+
+        #print("state")
+        #print(state)
+        print("now state")
+        print(state[:,:,2])
         print("action_probs")
         print(action_probs)
         action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
         next_state, reward = stateTransit(state, action)
-        print("now state")
-        print(state[:,:,2])
+        #print("now state matrix")
+        #print(state)
+
         print("action")
         print(action)
+
         print("reward")
         print(reward)
-
+        print("next_state")
+        print(next_state)
         #make vector into matrix
         next_state = np.append(state[:,:,1:],np.expand_dims(next_state,2), axis=2)
+
+        #print("next_state matrix")
+       # print(next_state)
 
         #if out of memory, kill one
         if len(replay_memory) == replay_memory_size:
@@ -367,6 +378,8 @@ def deep_q_learning(sess,
             print("loss")
             print(loss)
             total_t += 1
+
+
 
         state = next_state
 
