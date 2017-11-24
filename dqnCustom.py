@@ -233,9 +233,6 @@ def make_epsilon_greedy_policy(estimator, nA):
 
 
 class StateProcessor():
-    """
-    Processes a raw Atari iamges. Resizes it and converts it to grayscale.
-    """
 
     def __init__(self):
         # Build the Tensorflow graph
@@ -248,7 +245,6 @@ class StateProcessor():
         """
         Args:
             sess: A Tensorflow session object
-            state: A [210, 160, 3] Atari RGB State
         Returns:
             A processed [84, 84, 1] state representing grayscale values.
         """
